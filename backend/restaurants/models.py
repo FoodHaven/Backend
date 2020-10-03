@@ -21,7 +21,7 @@ class Restaurant(models.Model):
 class Item(models.Model):
     name = models.CharField(max_length=100)
     restaurant = models.ForeignKey(Restaurant, related_name='items', on_delete=models.CASCADE)
-    img_url = models.CharField(max_length=100)
+    img_url = models.CharField(max_length=1000)
     price = models.FloatField()
     def __str__(self):
         return self.name
@@ -29,10 +29,10 @@ class Item(models.Model):
 class Deal(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='deals', on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
-    description = models.CharField(max_length=50)
+    description = models.CharField(max_length=250)
     original_price = models.FloatField()
     new_price = models.FloatField()
-    img_url = models.CharField(max_length=100)
+    img_url = models.CharField(max_length=1000)
     items = models.ManyToManyField(Item)
 
     final_votes = models.IntegerField()
