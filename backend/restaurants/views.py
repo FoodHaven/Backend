@@ -95,5 +95,5 @@ def order_output(request):
         d['deal_name'] = deal.title
         d['restaurant_id'] = rest.id
         d['restaurant_name'] = rest.name
-
+        d['discount_price'] = deal.new_price
     return JsonResponse(resp, safe=False)
