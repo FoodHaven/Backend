@@ -3,6 +3,11 @@ from rest_framework import viewsets, permissions
 from .serializers import RestaurantSerializer, UserSerializer, DealSerializer, OrderSerializer, ItemSerializer
 from django.shortcuts import get_object_or_404, reverse
 from django.http import JsonResponse, HttpResponseRedirect
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, renderer_classes
+
 import json
 # import requests
 
@@ -54,8 +59,10 @@ def restaurant_info(request, rest_id):
     out = {}
     out['name'] = rest.name
 
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
 def deal_output(request):
-    resp = list((DealView.as_view({'get': 'list'})(request)).data)
+    resp = list((DealView.as_view({'get': 'list'})(request._request)).data)
     resp = list(map(dict, resp))
 
     for d in resp:
@@ -68,10 +75,12 @@ def deal_output(request):
 
 
     # print(l)
-    return JsonResponse(resp, safe=False)
+    return Response(resp)
 
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
 def order_output(request):
-    resp = list((OrderView.as_view({'get': 'list'})(request)).data)
+    resp = list((OrderView.as_view({'get': 'list'})(request._request)).data)
     resp = list(map(dict, resp))
     # print(dict(UserView.as_view({'get': 'retrieve'})(request,pk=1).data))
     # print(((UserView.as_view({'get': 'list'})(request,1)).data))
@@ -96,4 +105,4 @@ def order_output(request):
         d['restaurant_id'] = rest.id
         d['restaurant_name'] = rest.name
         d['discount_price'] = deal.new_price
-    return JsonResponse(resp, safe=False)
+    return Response(resp)
