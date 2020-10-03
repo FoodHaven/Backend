@@ -73,11 +73,10 @@ def deal_output(request):
 def order_output(request):
     resp = list((OrderView.as_view({'get': 'list'})(request)).data)
     resp = list(map(dict, resp))
-    print(resp)
-    print(dict(UserView.as_view({'get': 'retrieve'})(request,pk=1).data))
+    # print(dict(UserView.as_view({'get': 'retrieve'})(request,pk=1).data))
     # print(((UserView.as_view({'get': 'list'})(request,1)).data))
     for d in resp:
-        print(d['user'].split('/')[-2])
+        # print(d['user'].split('/')[-2])
         try:
             user_id = int(d['user'].split('/')[-2])
             deal_id = int(d['deal'].split('/')[-2])
@@ -85,9 +84,16 @@ def order_output(request):
             user_id = 1
             deal_id = 1
 
-        user_info = dict(UserView.as_view({'get': 'retrieve'})(request,pk=user_id).data)
-        deal_info = dict(DealView.as_view({'get': 'retrieve'})(request,pk=deal_id).data)
-        d['user'] = user_info['name']
-        d['deal'] = deal_info['title']
+        user = get_object_or_404(User, id=user_id)
+        deal = get_object_or_404(Deal, id=deal_id)
+        rest_id = deal.restaurant.id
+        rest = get_object_or_404(Restaurant, id=rest_id)
+
+        d['user_id'] = user_id
+        d['user_name'] = user.name
+        d['deal_id'] = deal.id
+        d['deal_name'] = deal.title
+        d['restaurant_id'] = rest.id
+        d['restaurant_name'] = rest.name
 
     return JsonResponse(resp, safe=False)
