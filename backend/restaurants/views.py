@@ -28,7 +28,6 @@ class ItemView(viewsets.ModelViewSet):
 
 
 def dealInfo(request, deal_id):
-    print('in')
     deal = get_object_or_404(Deal, id=int(deal_id))
     food_list = []
     for item in deal.items.all():
@@ -50,13 +49,23 @@ def user_order_info(request, user_id):
         order_list.append(d)
     return JsonResponse(order_list, safe=False)
 
+def restaurant_info(request, rest_id):
+    rest = get_object_or_404(Restaurant, id=rest_id)
+    out = {}
+    out['name'] = rest.name
+
 def deal_output(request):
     resp = list((DealView.as_view({'get': 'list'})(request)).data)
     resp = list(map(dict, resp))
 
     for d in resp:
+        rest_id = d['restaurant'].split('/')[-2]
+        rest = get_object_or_404(Restaurant, id=rest_id)
         items_info = json.loads(dealInfo(request, d['id']).content.decode('utf-8'))
+
         d['items'] = items_info
+        d['restaurant_name'] = rest.name
+
 
     # print(l)
     return JsonResponse(resp, safe=False)

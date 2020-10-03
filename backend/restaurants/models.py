@@ -34,7 +34,7 @@ class Deal(models.Model):
     new_price = models.FloatField()
     img_url = models.CharField(max_length=1000)
     items = models.ManyToManyField(Item)
-
+    deadline = models.DateTimeField()
     final_votes = models.IntegerField()
 
     # Many to one with Order
