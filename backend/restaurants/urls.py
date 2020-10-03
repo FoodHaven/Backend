@@ -13,6 +13,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('outputs/deals/', views.deal_output, name='deal_output'),
     path('outputs/orders/', views.order_output, name='order_output'),
+    path('send_sms/', views.twilio_sms, name='send_sms'),
     path('deals/items_info/<int:deal_id>/', views.dealInfo, name='deal_items'),
     path('users/orders_info/<int:user_id>/', views.user_order_info, name='user_orders'),
 ]

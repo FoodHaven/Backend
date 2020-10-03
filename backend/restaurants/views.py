@@ -2,11 +2,18 @@ from .models import Restaurant, User, Deal, Order, Item
 from rest_framework import viewsets, permissions
 from .serializers import RestaurantSerializer, UserSerializer, DealSerializer, OrderSerializer, ItemSerializer
 from django.shortcuts import get_object_or_404, reverse
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, renderer_classes
+from twilio.rest import Client
+from django.views.decorators.http import require_POST
+import os
+
+
+# Your Account Sid and Auth Token from twilio.com/console
+# DANGER! This is insecure. See http://twil.io/secure
 
 import json
 # import requests
@@ -106,3 +113,37 @@ def order_output(request):
         d['restaurant_name'] = rest.name
         d['discount_price'] = deal.new_price
     return Response(resp)
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+
+@require_POST
+@csrf_exempt
+def twilio_sms(request):
+    account_sid = os.getenv('ACC_SID')
+    auth_token = os.getenv('AUTH_TOKEN')
+
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    msg = body.get('msg')
+    number = body.get('number')
+    if (msg == None or number == None):
+        return HttpResponse(status=401)
+
+    client = Client(account_sid, auth_token)
+
+    if account_sid == None or auth_token == None:
+        return HttpResponse(status=500)
+
+    message = client.messages \
+        .create(
+        body=msg,
+        from_='+18339980513',
+        to=number
+    )
+    print(message.sid)
+    return(HttpResponse('SMS {} successful'.format(msg)))
+
+    # print(message.sid)
