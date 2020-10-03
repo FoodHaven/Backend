@@ -1,9 +1,10 @@
 from .models import Restaurant, User, Deal, Order, Item
 from rest_framework import viewsets, permissions
 from .serializers import RestaurantSerializer, UserSerializer, DealSerializer, OrderSerializer, ItemSerializer
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-
+from django.shortcuts import get_object_or_404, reverse
+from django.http import JsonResponse, HttpResponseRedirect
+import json
+# import requests
 
 class RestaurantView(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()
@@ -27,6 +28,7 @@ class ItemView(viewsets.ModelViewSet):
 
 
 def dealInfo(request, deal_id):
+    print('in')
     deal = get_object_or_404(Deal, id=int(deal_id))
     food_list = []
     for item in deal.items.all():
@@ -47,3 +49,36 @@ def user_order_info(request, user_id):
         d['price'] = order.deal.new_price
         order_list.append(d)
     return JsonResponse(order_list, safe=False)
+
+def deal_output(request):
+    resp = list((DealView.as_view({'get': 'list'})(request)).data)
+    resp = list(map(dict, resp))
+
+    for d in resp:
+        items_info = json.loads(dealInfo(request, d['id']).content.decode('utf-8'))
+        d['items'] = items_info
+
+    # print(l)
+    return JsonResponse(resp, safe=False)
+
+def order_output(request):
+    resp = list((OrderView.as_view({'get': 'list'})(request)).data)
+    resp = list(map(dict, resp))
+    print(resp)
+    print(dict(UserView.as_view({'get': 'retrieve'})(request,pk=1).data))
+    # print(((UserView.as_view({'get': 'list'})(request,1)).data))
+    for d in resp:
+        print(d['user'].split('/')[-2])
+        try:
+            user_id = int(d['user'].split('/')[-2])
+            deal_id = int(d['deal'].split('/')[-2])
+        except:
+            user_id = 1
+            deal_id = 1
+
+        user_info = dict(UserView.as_view({'get': 'retrieve'})(request,pk=user_id).data)
+        deal_info = dict(DealView.as_view({'get': 'retrieve'})(request,pk=deal_id).data)
+        d['user'] = user_info['name']
+        d['deal'] = deal_info['title']
+
+    return JsonResponse(resp, safe=False)
