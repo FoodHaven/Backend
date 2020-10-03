@@ -17,7 +17,7 @@ class DealSerializer(serializers.HyperlinkedModelSerializer):
         model = Deal
         fields = ('id', 'title', 'description','original_price','new_price',
                   'items', 'restaurant', 'orders', 'items_info_url',
-                  'final_votes', 'url')
+                  'final_votes', 'img_url', 'url')
         read_only_fields = ('orders',)
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
